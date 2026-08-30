@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  username     String        @unique
+  password     String
+  geminiApiKey String?
+  createdAt    DateTime      @default(now())
+  servers      SavedServer[]
+}
+
+// A PostgreSQL *server* the user has saved (host/port/credentials). One server
+// can hold many databases, mirroring the desktop app's server -> databases tree.
+model SavedServer {
+  id               String          @id @default(uuid())
+  userId           String
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name             String
+  host             String
+  port             Int             @default(5432)
+  databaseUser     String
+  password         String
+  ssl              Boolean         @default(false)
+  connectionString String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  databases        SavedDatabase[]
+
+  @@index([userId])
+}
+
+// One database registered under a saved server. Connecting opens a live pool
+// against this database using the parent server's credentials.
+model SavedDatabase {
+  id        String      @id @default(uuid())
+  serverId  String
+  server    SavedServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime    @default(now())
+
+  @@unique([serverId, name])
+  @@index([serverId])
+}

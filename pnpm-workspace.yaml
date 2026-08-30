@@ -1,0 +1,12 @@
+allowBuilds:
+  '@prisma/engines': true
+  prisma: true
+  unrs-resolver: true
+
+onlyBuiltDependencies:
+  - '@prisma/engines'
+  - prisma
+  - unrs-resolver
+
+verifyDepsBeforeRun: false
+strictDepBuilds: false
